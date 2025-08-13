@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String     @id @default(cuid())
+  email      String     @unique
+  password   String
+  name       String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  properties Property[]
+  sessions   Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Property {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  units       Unit[]
+  settings    PropertySettings?
+
+  @@map("properties")
+}
+
+model PropertySettings {
+  id                    String   @id @default(cuid())
+  propertyId            String   @unique
+  property              Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Evaluation settings
+  grossRentMultiplier   Float    @default(12)
+  operatingExpenseRatio Int      @default(25)
+  valueAdjustment       Int      @default(0)
+  
+  // Investment comparison settings
+  propertyAppreciation  Float    @default(2.0)
+  etfReturn            Float    @default(7.0)
+  years                Int      @default(10)
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("property_settings")
+}
+
+model Unit {
+  id               String   @id @default(cuid())
+  name             String
+  type             String
+  monthlyRent      Decimal  @db.Decimal(10, 2)
+  monthlyUtilities Decimal? @db.Decimal(10, 2)
+  size             String?
+  description      String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  propertyId       String
+  rentals          Rental[]
+  property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("units")
+}
+
+model Rental {
+  id              String   @id @default(cuid())
+  month           Int
+  year            Int
+  amount          Decimal  @db.Decimal(10, 2)
+  rentAmount      Decimal? @db.Decimal(10, 2)
+  utilitiesAmount Decimal? @db.Decimal(10, 2)
+  isPaid          Boolean  @default(false)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  unitId          String
+  unit            Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, month, year])
+  @@map("rentals")
+}
