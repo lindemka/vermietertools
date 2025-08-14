@@ -9,6 +9,7 @@ import { Building2, MapPin, Home, Euro, Calendar, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import Navigation from '@/components/navigation'
 import RentalOverviewEmbed from '@/components/RentalOverviewEmbed'
+import PropertyPeopleManager from '@/components/PropertyPeopleManager'
 
 interface Property {
   id: string
@@ -54,9 +55,20 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<'units' | 'rentals'>('rentals')
+  const [activeTab, setActiveTab] = useState<'units' | 'rentals' | 'people'>('rentals')
   const params = useParams()
   const propertyId = params.id as string
+
+  // Function to refresh property people when switching to people tab
+  const handleTabChange = (tab: 'units' | 'rentals' | 'people') => {
+    setActiveTab(tab);
+    if (tab === 'people' && (window as any).refreshPropertyPeople) {
+      // Small delay to ensure the component is mounted
+      setTimeout(() => {
+        (window as any).refreshPropertyPeople();
+      }, 100);
+    }
+  };
 
   useEffect(() => {
     if (propertyId) {
@@ -189,7 +201,7 @@ export default function PropertyDetailPage() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
               <button
-                onClick={() => setActiveTab('rentals')}
+                onClick={() => handleTabChange('rentals')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'rentals'
                     ? 'border-indigo-500 text-indigo-600'
@@ -199,7 +211,7 @@ export default function PropertyDetailPage() {
                 Mieteinnahmen
               </button>
               <button
-                onClick={() => setActiveTab('units')}
+                onClick={() => handleTabChange('units')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'units'
                     ? 'border-indigo-500 text-indigo-600'
@@ -207,6 +219,16 @@ export default function PropertyDetailPage() {
                 }`}
               >
                 Einheiten
+              </button>
+              <button
+                onClick={() => handleTabChange('people')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'people'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Personen
               </button>
             </nav>
           </div>
@@ -309,6 +331,20 @@ export default function PropertyDetailPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'people' && (
+          <div>
+            {/* People Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Personen</h2>
+                <p className="text-gray-600">Verwalten Sie die Personen, die diesem Objekt zugeordnet sind</p>
+              </div>
+            </div>
+            
+            <PropertyPeopleManager propertyId={propertyId} />
           </div>
         )}
       </div>

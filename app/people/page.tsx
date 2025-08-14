@@ -108,6 +108,11 @@ export default function PeoplePage() {
       setPeople(data.people);
       setTotalPages(data.pagination.pages);
       setCurrentPage(data.pagination.page);
+      
+      // If we have a search term and found exactly one person, select them automatically
+      if (search && data.people.length === 1) {
+        setSelectedPerson(data.people[0]);
+      }
     } catch (error) {
       console.error('Error fetching people:', error);
     } finally {
@@ -116,7 +121,17 @@ export default function PeoplePage() {
   };
 
   useEffect(() => {
-    fetchPeople();
+    // Check for search parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    if (searchParam) {
+      setSearchTerm(searchParam);
+      fetchPeople(searchParam, 1);
+    } else {
+      fetchPeople();
+    }
+    
     fetchProperties();
   }, []);
 
@@ -711,16 +726,19 @@ export default function PeoplePage() {
                       </div>
                       <div className="space-y-2">
                         {/* Property assignments */}
-                        {selectedPerson.propertyRoles
-                          .filter(role => !selectedPerson.unitRoles.some(unitRole => 
-                            unitRole.unit.property.id === role.property.id
-                          ))
-                          .map((role) => (
+                        {selectedPerson.propertyRoles.map((role) => (
                           <div key={role.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                             <div className="flex items-center gap-3">
                               <Building className="w-4 h-4 text-blue-600" />
                               <div>
-                                <div className="font-medium text-blue-900">{role.property.name}</div>
+                                <div className="font-medium text-blue-900">
+                                  <button
+                                    onClick={() => router.push(`/properties/${role.property.id}`)}
+                                    className="hover:text-blue-700 hover:underline transition-colors"
+                                  >
+                                    {role.property.name}
+                                  </button>
+                                </div>
                                 <select
                                   value={role.role}
                                   onChange={async (e) => {
@@ -804,7 +822,12 @@ export default function PeoplePage() {
                               <div>
                                 <div className="font-medium text-green-900">{role.unit.name}</div>
                                 <div className="text-sm text-green-700 mb-1">
-                                  {role.unit.property.name}
+                                  <button
+                                    onClick={() => router.push(`/properties/${role.unit.property.id}`)}
+                                    className="hover:text-green-700 hover:underline transition-colors"
+                                  >
+                                    {role.unit.property.name}
+                                  </button>
                                 </div>
                                 <select
                                   value={role.role}
