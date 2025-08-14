@@ -16,6 +16,15 @@ export async function getSession(): Promise<Session | null> {
   }
   
   try {
+    // Clean up expired sessions first
+    await prisma.session.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date()
+        }
+      }
+    })
+    
     // Find the session in the database
     const session = await prisma.session.findUnique({
       where: { token: sessionToken },
@@ -38,6 +47,19 @@ export async function getSession(): Promise<Session | null> {
   } catch (error) {
     console.error('Error retrieving session:', error)
     return null
+  }
+}
+
+export async function getUserFromSession(): Promise<{ id: string; email: string; name: string } | null> {
+  const session = await getSession()
+  if (!session) {
+    return null
+  }
+  
+  return {
+    id: session.userId,
+    email: session.email,
+    name: session.name
   }
 }
 
@@ -74,5 +96,15 @@ export async function destroySession(): Promise<void> {
     }
   }
   
+  // Clear the cookie
   cookieStore.delete('session-token')
+  
+  // Also set an expired cookie to ensure it's cleared
+  cookieStore.set('session-token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+  })
 }

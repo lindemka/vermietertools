@@ -16,6 +16,8 @@ model User {
   updatedAt  DateTime   @updatedAt
   properties Property[]
   sessions   Session[]
+  people     Person[]
+  generalPeople GeneralPerson[]
 
   @@map("users")
 }
@@ -43,6 +45,7 @@ model Property {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   units       Unit[]
   settings    PropertySettings?
+  people      PropertyPerson[]
 
   @@map("properties")
 }
@@ -82,6 +85,7 @@ model Unit {
   propertyId       String
   rentals          Rental[]
   property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  people           UnitPerson[]
 
   @@map("units")
 }
@@ -102,4 +106,76 @@ model Rental {
 
   @@unique([unitId, month, year])
   @@map("rentals")
+}
+
+model Person {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  propertyRoles PropertyPerson[]
+  unitRoles     UnitPerson[]
+  generalAssignments GeneralPerson[]
+
+  @@map("people")
+}
+
+model PropertyPerson {
+  id        String   @id @default(cuid())
+  role      String   // e.g., "hausmeister", "hausverwaltung", "owner"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  personId   String
+  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, propertyId, role])
+  @@map("property_people")
+}
+
+model UnitPerson {
+  id        String   @id @default(cuid())
+  role      String   // e.g., "tenant", "co-tenant", "subtenant"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  personId String
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  unitId   String
+  unit     Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, unitId, role])
+  @@map("unit_people")
+}
+
+model GeneralPerson {
+  id        String   @id @default(cuid())
+  assignment String  // e.g., "general", "contact", "emergency", "maintenance"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  personId String
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, userId, assignment])
+  @@map("general_people")
 }

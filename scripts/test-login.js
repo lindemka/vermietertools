@@ -5,49 +5,60 @@ const prisma = new PrismaClient()
 
 async function testLogin() {
   try {
-    console.log('Testing login functionality...')
+    console.log('🔍 Testing login functionality...')
     
-    // 1. Check if user exists
+    // Check if test user exists
     const user = await prisma.user.findUnique({
       where: { email: 'test@example.com' }
     })
-    
+
     if (!user) {
-      console.log('User not found')
+      console.log('❌ Test user not found')
       return
     }
+
+    console.log('✅ Test user found:', user.email)
+    console.log('📝 User details:', {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt
+    })
+
+    // Test password verification
+    const testPassword = 'password123'
+    const isValid = await bcrypt.compare(testPassword, user.password)
     
-    console.log('User found:', user.email)
-    
-    // 2. Test password verification
-    const isValid = await bcrypt.compare('password123', user.password)
-    console.log('Password valid:', isValid)
-    
-    // 3. Test session creation
-    const sessionToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 7)
-    
-    const session = await prisma.session.create({
-      data: {
-        token: sessionToken,
-        userId: user.id,
-        expiresAt: expiresAt
+    if (isValid) {
+      console.log('✅ Password verification successful')
+    } else {
+      console.log('❌ Password verification failed')
+    }
+
+    // Check sessions table
+    const sessions = await prisma.session.findMany({
+      where: { userId: user.id }
+    })
+
+    console.log(`📊 Found ${sessions.length} active sessions for user`)
+
+    // List all users
+    const allUsers = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true
       }
     })
-    
-    console.log('Session created:', session.id)
-    
-    // 4. Test session retrieval
-    const retrievedSession = await prisma.session.findUnique({
-      where: { token: sessionToken },
-      include: { user: true }
+
+    console.log('👥 All users in database:')
+    allUsers.forEach(u => {
+      console.log(`  - ${u.email} (${u.name}) - Created: ${u.createdAt}`)
     })
-    
-    console.log('Session retrieved:', retrievedSession ? 'success' : 'failed')
-    
+
   } catch (error) {
-    console.error('Error:', error)
+    console.error('❌ Error testing login:', error)
   } finally {
     await prisma.$disconnect()
   }
