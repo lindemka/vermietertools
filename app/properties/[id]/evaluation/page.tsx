@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Building2, Calculator, TrendingUp, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 import { formatCurrency } from '@/lib/utils'
 
 interface Property {
@@ -215,7 +215,6 @@ export default function PropertyEvaluation() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
@@ -229,7 +228,6 @@ export default function PropertyEvaluation() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Fehler</h1>
@@ -246,7 +244,6 @@ export default function PropertyEvaluation() {
   if (!property) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Objekt nicht gefunden</h1>
@@ -261,7 +258,6 @@ export default function PropertyEvaluation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Home, Building2, Euro, Shield } from 'lucide-react'
+import { Home, Building2, Euro, ChartNoAxesCombined} from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -43,12 +43,12 @@ export default function HomePage() {
 
           <Card className="text-center">
             <CardHeader>
-              <Shield className="w-12 h-12 mx-auto text-purple-600 mb-4" />
-              <CardTitle>Sicher & Lokal</CardTitle>
+              <ChartNoAxesCombined className="w-12 h-12 mx-auto text-purple-600 mb-4" />
+              <CardTitle>Überblick</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Alle Daten bleiben bei Ihnen - keine externen Services oder APIs
+                Mehr Übersicht über Ihre wichtigsten Zahlen und Mieterinformationen
               </CardDescription>
             </CardContent>
           </Card>

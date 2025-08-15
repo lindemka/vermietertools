@@ -8,6 +8,8 @@ export default function DebugPage() {
   const [sessionInfo, setSessionInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [hasSessionCookie, setHasSessionCookie] = useState<boolean | null>(null)
+  const [rawCookies, setRawCookies] = useState<string>('')
 
   useEffect(() => {
     checkSession()
@@ -32,6 +34,18 @@ export default function DebugPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // Access cookies on client only after mount
+    try {
+      const cookies = document.cookie || ''
+      setRawCookies(cookies)
+      setHasSessionCookie(cookies.includes('session-token'))
+    } catch {
+      setRawCookies('')
+      setHasSessionCookie(null)
+    }
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -85,10 +99,10 @@ export default function DebugPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            Session-Token: {document.cookie.includes('session-token') ? 'Gefunden' : 'Nicht gefunden'}
+            Session-Token: {hasSessionCookie === null ? 'Unbekannt' : hasSessionCookie ? 'Gefunden' : 'Nicht gefunden'}
           </p>
           <pre className="bg-gray-100 p-4 rounded text-sm mt-2 overflow-auto">
-            {document.cookie || 'Keine Cookies'}
+            {rawCookies || 'Keine Cookies'}
           </pre>
         </CardContent>
       </Card>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Home, ArrowLeft, Plus, Edit, Trash2, Euro, Calendar } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 interface Unit {
   id: string
@@ -127,7 +127,6 @@ export default function UnitDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Laden...</div>
         </div>
@@ -138,7 +137,6 @@ export default function UnitDetailPage() {
   if (error || !unit) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">{error || 'Einheit nicht gefunden'}</div>
           <div className="text-center mt-4">
@@ -153,7 +151,6 @@ export default function UnitDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link href={`/properties/${unit.propertyId}`} className="inline-flex items-center text-blue-600 hover:text-blue-800">

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Building2, ArrowLeft, Save, Trash2 } from 'lucide-react'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 interface Property {
   id: string
@@ -130,7 +130,6 @@ export default function EditPropertyPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Laden...</div>
         </div>
@@ -141,7 +140,6 @@ export default function EditPropertyPage() {
   if (error && !property) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">{error}</div>
           <div className="text-center mt-4">
@@ -156,7 +154,6 @@ export default function EditPropertyPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-6">

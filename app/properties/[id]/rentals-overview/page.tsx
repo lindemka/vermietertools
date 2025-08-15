@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Building2, ArrowLeft, Check, X, Euro, Calendar } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 interface Property {
   id: string
@@ -131,7 +131,6 @@ export default function PropertyRentalsOverviewPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Laden...</div>
         </div>
@@ -142,7 +141,6 @@ export default function PropertyRentalsOverviewPage() {
   if (error || !property) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">{error || 'Objekt nicht gefunden'}</div>
           <div className="text-center mt-4">
@@ -157,7 +155,6 @@ export default function PropertyRentalsOverviewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link href={`/properties/${propertyId}`} className="inline-flex items-center text-blue-600 hover:text-blue-800">

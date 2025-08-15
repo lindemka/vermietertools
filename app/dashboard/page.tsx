@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Building2, Euro, Plus, TrendingUp, Calendar } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import Navigation from '@/components/navigation'
+// Navigation is injected by the root layout
 
 interface Property {
   id: string
@@ -101,16 +101,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <Link href="/properties/new">
-            <Button className="w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              Neues Objekt
-            </Button>
-          </Link>
         </div>
 
         {error && (
@@ -191,7 +184,8 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Existing Property Cards */}
                   {properties.map((property) => {
                     const units = property.units || []
                     const totalMonthlyRent = units
@@ -200,24 +194,69 @@ export default function DashboardPage() {
                     
                     return (
                       <Link key={property.id} href={`/properties/${property.id}`}>
-                        <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                          <div>
-                            <h3 className="font-medium">{property.name}</h3>
-                            <p className="text-sm text-gray-500">{property.address}</p>
-                            <p className="text-xs text-gray-400">
-                              {units.length} Einheit{units.length !== 1 ? 'en' : ''}
-                            </p>
+                        <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+                          <div className="relative">
+                            <img
+                              src={property.name.includes('München') 
+                                ? "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=250&fit=crop&crop=center"
+                                : "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop&crop=center"
+                              }
+                              alt={`${property.name} - Gebäude`}
+                              className="w-full h-48 object-cover rounded-t-lg group-hover:brightness-105 transition-all"
+                            />
+                            <div className="absolute top-3 right-3">
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                property.isActive 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {property.isActive ? 'Aktiv' : 'Inaktiv'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium">{formatCurrency(totalMonthlyRent)}</p>
-                            <p className="text-sm text-gray-500">
-                              {property.isActive ? 'Aktiv' : 'Inaktiv'}
-                            </p>
-                          </div>
-                        </div>
+                          <CardContent className="p-4">
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors">
+                                {property.name}
+                              </h3>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {property.address}
+                              </p>
+                              <div className="flex items-center justify-between pt-2">
+                                <div className="text-sm text-gray-500">
+                                  <Building2 className="w-4 h-4 inline mr-1" />
+                                  {units.length} Einheit{units.length !== 1 ? 'en' : ''}
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-semibold text-blue-600">
+                                    {formatCurrency(totalMonthlyRent)}
+                                  </p>
+                                  <p className="text-xs text-gray-500">pro Monat</p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       </Link>
                     )
                   })}
+
+                  {/* New Property Card */}
+                  <Link href="/properties/new">
+                    <Card className="hover:shadow-lg transition-shadow cursor-pointer group border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50">
+                      <div className="relative h-48 flex items-center justify-center">
+                        <div className="text-center">
+                          <Plus className="w-16 h-16 mx-auto text-gray-400 group-hover:text-blue-500 transition-colors mb-4" />
+                          <h3 className="font-semibold text-lg text-gray-600 group-hover:text-blue-600 transition-colors">
+                            Neues Objekt
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-2">
+                            Neues Mietobjekt hinzufügen
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
                 </div>
               )}
             </CardContent>

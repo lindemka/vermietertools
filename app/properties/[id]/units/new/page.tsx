@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Building2, ArrowLeft, Home } from 'lucide-react'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 const unitTypes = [
   { value: 'wohnung', label: 'Wohnung' },
@@ -92,7 +92,6 @@ export default function NewUnitPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-6">

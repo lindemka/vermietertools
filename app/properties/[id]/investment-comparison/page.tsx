@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, TrendingUp, Home, BarChart3, Calculator, Info } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 interface Property {
   id: string
@@ -263,7 +263,6 @@ export default function InvestmentComparisonPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Laden...</div>
         </div>
@@ -274,7 +273,6 @@ export default function InvestmentComparisonPage() {
   if (error || !property) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">{error || 'Objekt nicht gefunden'}</div>
           <div className="text-center mt-4">
@@ -289,7 +287,6 @@ export default function InvestmentComparisonPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
@@ -433,6 +430,8 @@ export default function InvestmentComparisonPage() {
 
                 <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
                   <strong>Hinweis:</strong> Objektwert wird aus der Bewertung übernommen, Mieteinnahmen und Kosten aus Ihren Eigenschaftsdaten.
+                  <br />
+                  <strong>ETF-Szenario:</strong> Nur der Objektwert wird in ETFs investiert (ohne Mieteinnahmen).
                 </div>
               </CardContent>
             </Card>
@@ -497,12 +496,12 @@ export default function InvestmentComparisonPage() {
                         </CardHeader>
                         <CardContent className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">ETF-Wert:</span>
-                            <span className="font-medium">{formatCurrency(comparison.etfScenario.totalValue)}</span>
+                            <span className="text-sm text-gray-600">Investiertes Kapital:</span>
+                            <span className="font-medium">{formatCurrency(propertyValue)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Mieteinnahmen:</span>
-                            <span className="font-medium text-gray-400">-</span>
+                            <span className="text-sm text-gray-600">ETF-Wert nach {years} Jahren:</span>
+                            <span className="font-medium">{formatCurrency(comparison.etfScenario.totalValue)}</span>
                           </div>
                           <div className="flex justify-between font-semibold border-t pt-2">
                             <span>Gesamtwert:</span>
@@ -559,6 +558,11 @@ export default function InvestmentComparisonPage() {
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <p className="text-sm text-yellow-800">
                         <strong>Hinweis:</strong> Diese Berechnung ist eine vereinfachte Simulation. 
+                        <br />
+                        <strong>Immobilie:</strong> Wertsteigerung + Mieteinnahmen - Betriebskosten
+                        <br />
+                        <strong>ETF:</strong> Nur Objektwert wird investiert (ohne Mieteinnahmen)
+                        <br />
                         Realistische Faktoren wie Steuern, Transaktionskosten, Leerstände, 
                         Marktvolatilität und individuelle Umstände wurden nicht berücksichtigt. 
                         Konsultieren Sie einen Finanzberater für eine detaillierte Analyse.

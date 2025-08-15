@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Building2, LogOut, Menu, X, Users, User, ChevronDown, Home, Plus } from 'lucide-react'
+import ThemeToggle from '@/components/theme-toggle'
 
 interface User {
   id: string
@@ -88,6 +89,12 @@ export default function Navigation() {
                 Personen
               </Button>
             </Link>
+            <Link href="/properties/new">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Neues Objekt
+              </Button>
+            </Link>
             
             {/* User Menu - Always reserve space to prevent layout shift */}
             <div className="relative" ref={userMenuRef}>
@@ -130,10 +137,12 @@ export default function Navigation() {
                 <div className="w-32 h-10"></div>
               )}
             </div>
+            <ThemeToggle />
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
@@ -169,7 +178,7 @@ export default function Navigation() {
                 </Button>
               </Link>
               <Link href="/properties/new">
-                <Button variant="ghost" className="w-full justify-start">
+                <Button className="w-full justify-start">
                   <Plus className="w-4 h-4 mr-2" />
                   Neues Objekt
                 </Button>

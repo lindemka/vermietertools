@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Navigation from '@/components/navigation';
+// Navigation is provided by the root layout
 import { Search, User, Mail, Phone, MapPin, Building, Home, Plus, Edit, Trash2, X, Save, X as XIcon } from 'lucide-react';
 
 interface Person {
@@ -346,7 +346,6 @@ export default function PeoplePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">

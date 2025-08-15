@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Home, ArrowLeft, Save, Trash2 } from 'lucide-react'
-import Navigation from '@/components/navigation'
+// Navigation is provided by the root layout
 
 const unitTypes = [
   { value: 'wohnung', label: 'Wohnung' },
@@ -142,7 +142,6 @@ export default function EditUnitPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Laden...</div>
         </div>
@@ -153,7 +152,6 @@ export default function EditUnitPage() {
   if (error && !unit) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">{error}</div>
           <div className="text-center mt-4">
@@ -168,7 +166,6 @@ export default function EditUnitPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-6">
