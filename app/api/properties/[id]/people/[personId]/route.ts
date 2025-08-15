@@ -4,13 +4,15 @@ import { getUserFromSession } from '@/lib/session';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; personId: string } }
+  { params }: { params: Promise<{ id: string; personId: string }> }
 ) {
   try {
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
+
+    const { id, personId } = await params
 
     const body = await request.json();
     const { role } = body;
@@ -22,7 +24,7 @@ export async function PUT(
     // Verify property belongs to user
     const property = await prisma.property.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -35,8 +37,8 @@ export async function PUT(
     // Find the property-person relationship by personId and propertyId
     const propertyPerson = await prisma.propertyPerson.findFirst({
       where: {
-        personId: params.personId,
-        propertyId: params.id,
+        personId: personId,
+        propertyId: id,
         isActive: true,
       },
     });
@@ -60,7 +62,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; personId: string } }
+  { params }: { params: Promise<{ id: string; personId: string }> }
 ) {
   try {
     const user = await getUserFromSession();
@@ -68,10 +70,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
+    const { id, personId } = await params
+
     // Verify property belongs to user
     const property = await prisma.property.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -84,8 +88,8 @@ export async function DELETE(
     // Find the property-person relationship by personId and propertyId
     const propertyPerson = await prisma.propertyPerson.findFirst({
       where: {
-        personId: params.personId,
-        propertyId: params.id,
+        personId: personId,
+        propertyId: id,
         isActive: true,
       },
     });

@@ -4,13 +4,15 @@ import { getUserFromSession } from '@/lib/session';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; personId: string } }
+  { params }: { params: Promise<{ id: string; personId: string }> }
 ) {
   try {
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
+
+    const { id, personId } = await params
 
     const body = await request.json();
     const { role } = body;
@@ -22,7 +24,7 @@ export async function PUT(
     // Verify unit belongs to user's property
     const unit = await prisma.unit.findFirst({
       where: {
-        id: params.id,
+        id: id,
         property: {
           userId: user.id,
           isActive: true,
@@ -38,8 +40,8 @@ export async function PUT(
     // Find the unit-person relationship by personId and unitId
     const unitPerson = await prisma.unitPerson.findFirst({
       where: {
-        personId: params.personId,
-        unitId: params.id,
+        personId: personId,
+        unitId: id,
         isActive: true,
       },
     });
@@ -63,7 +65,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; personId: string } }
+  { params }: { params: Promise<{ id: string; personId: string }> }
 ) {
   try {
     const user = await getUserFromSession();
@@ -71,10 +73,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
+    const { id, personId } = await params
+
     // Verify unit belongs to user's property
     const unit = await prisma.unit.findFirst({
       where: {
-        id: params.id,
+        id: id,
         property: {
           userId: user.id,
           isActive: true,
@@ -90,8 +94,8 @@ export async function DELETE(
     // Find the unit-person relationship by personId and unitId
     const unitPerson = await prisma.unitPerson.findFirst({
       where: {
-        personId: params.personId,
-        unitId: params.id,
+        personId: personId,
+        unitId: id,
         isActive: true,
       },
     });

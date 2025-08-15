@@ -4,9 +4,11 @@ import { getUserFromSession } from '@/lib/session';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -15,7 +17,7 @@ export async function GET(
     // Verify unit belongs to user's property
     const unit = await prisma.unit.findFirst({
       where: {
-        id: params.id,
+        id: id,
         property: {
           userId: user.id,
           isActive: true,
@@ -30,7 +32,7 @@ export async function GET(
 
     const unitPeople = await prisma.unitPerson.findMany({
       where: {
-        unitId: params.id,
+        unitId: id,
         isActive: true,
       },
       include: {
@@ -52,9 +54,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -63,7 +67,7 @@ export async function POST(
     // Verify unit belongs to user's property
     const unit = await prisma.unit.findFirst({
       where: {
-        id: params.id,
+        id: id,
         property: {
           userId: user.id,
           isActive: true,
@@ -96,11 +100,11 @@ export async function POST(
       return NextResponse.json({ error: 'Person nicht gefunden' }, { status: 404 });
     }
 
-    // Check if relationship already exists (any role for this person and unit)
+    // Check if relationship already exists
     const existingRelationship = await prisma.unitPerson.findFirst({
       where: {
         personId,
-        unitId: params.id,
+        unitId: id,
         isActive: true,
       },
     });
@@ -109,70 +113,42 @@ export async function POST(
       return NextResponse.json({ error: 'Person ist bereits dieser Einheit zugeordnet' }, { status: 400 });
     }
 
-    // Check if there's an inactive relationship that we can reactivate
-    const inactiveRelationship = await prisma.unitPerson.findFirst({
-      where: {
+    // Create new relationship
+    const unitPerson = await prisma.unitPerson.create({
+      data: {
         personId,
-        unitId: params.id,
-        isActive: false,
+        unitId: id,
+        role,
+        isActive: true,
+      },
+      include: {
+        person: true,
       },
     });
 
-    let unitPerson;
-    if (inactiveRelationship) {
-      // Reactivate the existing relationship with the new role
-      unitPerson = await prisma.unitPerson.update({
-        where: { id: inactiveRelationship.id },
-        data: {
-          role,
-          isActive: true,
-        },
-        include: {
-          person: true,
-        },
-      });
-    } else {
-      // Create a new relationship
-      unitPerson = await prisma.unitPerson.create({
-        data: {
-          personId,
-          unitId: params.id,
-          role,
-        },
-        include: {
-          person: true,
-        },
-      });
-    }
-
-    return NextResponse.json(unitPerson, { status: 201 });
+    return NextResponse.json(unitPerson);
   } catch (error) {
-    console.error('Error adding person to unit:', error);
+    console.error('Error assigning person to unit:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const personId = searchParams.get('personId');
-
-    if (!personId) {
-      return NextResponse.json({ error: 'Person ID ist erforderlich' }, { status: 400 });
-    }
-
     // Verify unit belongs to user's property
     const unit = await prisma.unit.findFirst({
       where: {
-        id: params.id,
+        id: id,
         property: {
           userId: user.id,
           isActive: true,
@@ -185,11 +161,18 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unit not found' }, { status: 404 });
     }
 
+    const body = await request.json();
+    const { personId } = body;
+
+    if (!personId) {
+      return NextResponse.json({ error: 'Person ID ist erforderlich' }, { status: 400 });
+    }
+
     // Find the unit-person relationship
     const unitPerson = await prisma.unitPerson.findFirst({
       where: {
-        personId: personId,
-        unitId: params.id,
+        personId,
+        unitId: id,
         isActive: true,
       },
     });

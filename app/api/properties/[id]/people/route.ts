@@ -4,9 +4,11 @@ import { getUserFromSession } from '@/lib/session';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -15,7 +17,7 @@ export async function GET(
     // Verify property belongs to user
     const property = await prisma.property.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -27,7 +29,7 @@ export async function GET(
 
     const propertyPeople = await prisma.propertyPerson.findMany({
       where: {
-        propertyId: params.id,
+        propertyId: id,
         isActive: true,
       },
       include: {
@@ -49,9 +51,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -60,7 +64,7 @@ export async function POST(
     // Verify property belongs to user
     const property = await prisma.property.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -94,7 +98,7 @@ export async function POST(
     const existingRelationship = await prisma.propertyPerson.findFirst({
       where: {
         personId,
-        propertyId: params.id,
+        propertyId: id,
         isActive: true,
       },
     });
@@ -103,77 +107,42 @@ export async function POST(
       return NextResponse.json({ error: 'Person ist bereits diesem Objekt zugeordnet' }, { status: 400 });
     }
 
-    // Check if there's an inactive relationship that we can reactivate
-    const inactiveRelationship = await prisma.propertyPerson.findFirst({
-      where: {
+    // Create new relationship
+    const propertyPerson = await prisma.propertyPerson.create({
+      data: {
         personId,
-        propertyId: params.id,
-        isActive: false,
+        propertyId: id,
+        role,
+        isActive: true,
+      },
+      include: {
+        person: true,
       },
     });
 
-    let propertyPerson;
-    if (inactiveRelationship) {
-      // Reactivate the existing relationship with the new role
-      propertyPerson = await prisma.propertyPerson.update({
-        where: { id: inactiveRelationship.id },
-        data: {
-          role,
-          isActive: true,
-        },
-        include: {
-          person: true,
-        },
-      });
-    } else {
-      // Create a new relationship
-      propertyPerson = await prisma.propertyPerson.create({
-        data: {
-          personId,
-          propertyId: params.id,
-          role,
-        },
-        include: {
-          person: true,
-        },
-      });
-    }
-
-    return NextResponse.json(propertyPerson, { status: 201 });
+    return NextResponse.json(propertyPerson);
   } catch (error) {
-    console.error('Error adding person to property:', error);
-    
-    // Check for specific error types
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Person ist bereits diesem Objekt zugeordnet' }, { status: 400 });
-    }
-    
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: `Internal server error: ${errorMessage}` }, { status: 500 });
+    console.error('Error assigning person to property:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const user = await getUserFromSession();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const personId = searchParams.get('personId');
-
-    if (!personId) {
-      return NextResponse.json({ error: 'Person ID ist erforderlich' }, { status: 400 });
-    }
-
     // Verify property belongs to user
     const property = await prisma.property.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -183,11 +152,18 @@ export async function DELETE(
       return NextResponse.json({ error: 'Property not found' }, { status: 404 });
     }
 
+    const body = await request.json();
+    const { personId } = body;
+
+    if (!personId) {
+      return NextResponse.json({ error: 'Person ID ist erforderlich' }, { status: 400 });
+    }
+
     // Find the property-person relationship
     const propertyPerson = await prisma.propertyPerson.findFirst({
       where: {
-        personId: personId,
-        propertyId: params.id,
+        personId,
+        propertyId: id,
         isActive: true,
       },
     });
