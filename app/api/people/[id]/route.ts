@@ -4,7 +4,7 @@ import { getUserFromSession } from '@/lib/session';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromSession();
@@ -12,9 +12,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params
+
     const person = await prisma.person.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -49,7 +51,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromSession();
@@ -57,6 +59,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params
     const body = await request.json();
     const { firstName, lastName, email, phone, notes } = body;
 
@@ -66,7 +69,7 @@ export async function PUT(
 
     const person = await prisma.person.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -77,7 +80,7 @@ export async function PUT(
     }
 
     const updatedPerson = await prisma.person.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         firstName,
         lastName,
@@ -96,7 +99,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromSession();
@@ -104,9 +107,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params
+
     const person = await prisma.person.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
         isActive: true,
       },
@@ -118,7 +123,7 @@ export async function DELETE(
 
     // Soft delete by setting isActive to false
     await prisma.person.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { isActive: false },
     });
 
