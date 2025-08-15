@@ -4,7 +4,7 @@ import { getSession } from '@/lib/session'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -17,9 +17,11 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     const property = await prisma.property.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         userId: session.userId
       },
       include: {

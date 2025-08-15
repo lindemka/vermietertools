@@ -47,9 +47,13 @@ export default function Navigation() {
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
+      } else {
+        // If not authenticated, set loading to false immediately
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error fetching user:', error)
+      setLoading(false)
     } finally {
       setLoading(false)
     }
@@ -96,7 +100,7 @@ export default function Navigation() {
               </Button>
             </Link>
             
-            {/* User Menu - Always reserve space to prevent layout shift */}
+            {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
               {!loading && user ? (
                 <>
@@ -132,9 +136,17 @@ export default function Navigation() {
                     </div>
                   )}
                 </>
+              ) : !loading ? (
+                // Show login link when not logged in
+                <Link href="/login">
+                  <Button variant="ghost">
+                    <User className="w-4 h-4 mr-2" />
+                    Anmelden
+                  </Button>
+                </Link>
               ) : (
-                // Placeholder to prevent layout shift
-                <div className="w-32 h-10"></div>
+                // Loading state
+                <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
               )}
             </div>
             <ThemeToggle />

@@ -4,7 +4,7 @@ import { getSession } from '@/lib/session'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -17,10 +17,12 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     // Verify property ownership
     const property = await prisma.property.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         userId: session.userId
       }
     })
@@ -34,7 +36,7 @@ export async function GET(
 
     // Load settings from database
     const settings = await prisma.propertySettings.findUnique({
-      where: { propertyId: params.id }
+      where: { propertyId: id }
     })
 
     // Return settings or defaults
@@ -59,7 +61,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -72,10 +74,12 @@ export async function POST(
       )
     }
 
+    const { id } = await params
+
     // Verify property ownership
     const property = await prisma.property.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         userId: session.userId
       }
     })
@@ -91,7 +95,7 @@ export async function POST(
 
     // Upsert settings in database
     const settings = await prisma.propertySettings.upsert({
-      where: { propertyId: params.id },
+      where: { propertyId: id },
       update: {
         ...(newSettings.grossRentMultiplier !== undefined && { grossRentMultiplier: newSettings.grossRentMultiplier }),
         ...(newSettings.operatingExpenseRatio !== undefined && { operatingExpenseRatio: newSettings.operatingExpenseRatio }),
@@ -102,7 +106,7 @@ export async function POST(
         updatedAt: new Date()
       },
       create: {
-        propertyId: params.id,
+        propertyId: id,
         grossRentMultiplier: newSettings.grossRentMultiplier || 12,
         operatingExpenseRatio: newSettings.operatingExpenseRatio || 25,
         valueAdjustment: newSettings.valueAdjustment || 0,
@@ -112,7 +116,7 @@ export async function POST(
       }
     })
     
-    console.log('Saving settings for property:', params.id, settings)
+    console.log('Saving settings for property:', id, settings)
 
     return NextResponse.json({ 
       message: 'Einstellungen gespeichert',

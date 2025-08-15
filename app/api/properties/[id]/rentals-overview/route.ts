@@ -4,7 +4,7 @@ import { getSession } from '@/lib/session'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -17,13 +17,14 @@ export async function GET(
       )
     }
 
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
 
     // Get property with all units and their rentals and verify ownership
     const property = await prisma.property.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         userId: session.userId
       },
       include: {

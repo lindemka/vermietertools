@@ -4,7 +4,7 @@ import { getSession } from '@/lib/session'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -17,13 +17,14 @@ export async function GET(
       )
     }
 
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
 
     // Get unit with existing rentals and verify ownership
     const unit = await prisma.unit.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         property: {
           userId: session.userId
         }
@@ -101,7 +102,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get current user session
@@ -114,6 +115,7 @@ export async function POST(
       )
     }
 
+    const { id } = await params
     const { month, year, isPaid, notes, amount, rentAmount, utilitiesAmount } = await request.json()
 
     // Validation
@@ -127,7 +129,7 @@ export async function POST(
     // Get unit to calculate default amounts and verify ownership
     const unit = await prisma.unit.findFirst({
       where: { 
-        id: params.id,
+        id: id,
         property: {
           userId: session.userId
         }
@@ -151,7 +153,7 @@ export async function POST(
     const existingRental = await prisma.rental.findUnique({
       where: {
         unitId_month_year: {
-          unitId: params.id,
+          unitId: id,
           month,
           year
         }
@@ -187,7 +189,7 @@ export async function POST(
           utilitiesAmount: finalUtilitiesAmount,
           isPaid: isPaid || false,
           notes: notes || '',
-          unitId: params.id
+          unitId: id
         }
       })
 
